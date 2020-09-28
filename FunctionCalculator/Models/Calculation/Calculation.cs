@@ -18,12 +18,13 @@ namespace FunctionCalculator.Models.Calculation
 		}
 		public void SetX(double x)
 		{
-					X.SetValue(x);
+			X.SetValue(x);
 		}
 		public double Calculate()
 		{
 			position = 0;
 			UniversalOperation result = ParsingAnExpression_LowPriority();
+			LastValidation();
 			return result.Operation();
 		}
 		public double Calculate(string curExp)
@@ -31,7 +32,14 @@ namespace FunctionCalculator.Models.Calculation
 			position = 0;
 			_currentExpression = curExp.ToLower().Replace(" ", "").Replace("\t", "").Replace("\n", "");
 			UniversalOperation result = ParsingAnExpression_LowPriority();
+			LastValidation();
 			return result.Operation();
+		}
+
+		public void LastValidation()
+		{
+			if (position != _currentExpression.Length)
+				throw new Exception($"Can't parse character at {position} position");
 		}
 
 		private UniversalOperation ParsingAnExpression_LowPriority()
@@ -60,19 +68,17 @@ namespace FunctionCalculator.Models.Calculation
 			UniversalOperation result = ParsingAnExpression_HighPriority();
 			while (true)
 			{
-				//You can use this for multiplicatio, division, moduloDivision
-
 				if (MatchSearch('*'))
 				{
-					result = new Multiply(result, ParsingAnExpression_MediumPriority());
+					result = new Multiply(result, ParsingAnExpression_HighPriority());
 				}
 				else if (MatchSearch('%'))
 				{
-					result = new Division(result, ParsingAnExpression_MediumPriority());
+					result = new Division(result, ParsingAnExpression_HighPriority());
 				}
 				else if (MatchSearch('/') || MatchSearch('÷'))
 				{
-					result = new Division(result, ParsingAnExpression_MediumPriority());
+					result = new Division(result, ParsingAnExpression_HighPriority());
 				}
 				else
 				{
@@ -198,7 +204,7 @@ namespace FunctionCalculator.Models.Calculation
 			}
 			try
 			{
-				val = double.Parse(_currentExpression.Substring(startPosition, position - startPosition));
+				val = double.Parse(_currentExpression[startPosition..position]);
 			}
 			catch (System.Exception e)
 			{
@@ -211,10 +217,9 @@ namespace FunctionCalculator.Models.Calculation
 
 		private bool MatchSearch(string str)
 		{
-
 			if (_currentExpression.Substring(position).StartsWith(str))
 			{
-				position += str.Length;
+				 position += str.Length;
 				return true;
 			}
 			else
