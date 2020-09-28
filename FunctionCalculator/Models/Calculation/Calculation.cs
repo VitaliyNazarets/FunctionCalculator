@@ -20,17 +20,13 @@ namespace FunctionCalculator.Models.Calculation
 		{
 			X.SetValue(x);
 		}
-		public double Calculate()
-		{
-			position = 0;
-			UniversalOperation result = ParsingAnExpression_LowPriority();
-			LastValidation();
-			return result.Operation();
-		}
+
 		public double Calculate(string curExp)
 		{
 			position = 0;
 			_currentExpression = curExp.ToLower().Replace(" ", "").Replace("\t", "").Replace("\n", "");
+			if (_currentExpression.Length == 0)
+				throw new Exception("You must enter an expression");
 			UniversalOperation result = ParsingAnExpression_LowPriority();
 			LastValidation();
 			return result.Operation();
